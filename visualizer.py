@@ -27,7 +27,6 @@ class Visualizer(object):
         blue = np.zeros_like(color_image)
         green = np.zeros_like(color_image)
         red = np.zeros_like(color_image)
-        # 各チャネルの輝度値を格納
         blue[:, :, 0] = color_image[:, :, 0]
         green[:, :, 1] = color_image[:, :, 1]
         red[:, :, 2] = color_image[:, :, 2]
@@ -47,9 +46,9 @@ class Visualizer(object):
         img_xy = cv2.filter2D(gray, -1, kernel_xy)
 
         if save:
-            cv2.imwrite(self.filename % 'Xgradient', img_x)
-            cv2.imwrite(self.filename % 'Ygradient', img_y)
-            cv2.imwrite(self.filename % 'XYgradient', img_xy)
+            cv2.imwrite(self.filename % 'gradient_x', img_x)
+            cv2.imwrite(self.filename % 'gradient_y', img_y)
+            cv2.imwrite(self.filename % 'gradient_xy', img_xy)
 
     def color_gradient(self, save=False, show=False):
         color_image = self.color_image.copy()
@@ -70,9 +69,10 @@ class Visualizer(object):
         img_xy[:, :, 2] = cv2.filter2D(color_image[:, :, 2], -1, kernel_xy)
 
         if save:
-            cv2.imwrite(self.filename % 'XcolorGradient', img_x)
-            cv2.imwrite(self.filename % 'YcolorGradient', img_y)
-            cv2.imwrite(self.filename % 'XYcolorGradient', img_xy)
+            cv2.imwrite(self.filename % 'gradient_color_x', img_x)
+            cv2.imwrite(self.filename % 'gradient_color_y', img_y)
+            cv2.imwrite(self.filename % 'gradient_color_xy', img_xy)
+
 
     def power_spectrum(self, save=False, show=False):
         gray = cv2.cvtColor(self.color_image.copy(), cv2.COLOR_BGR2GRAY)
@@ -94,8 +94,8 @@ class Visualizer(object):
         #print('SIFT  = %5d\nDense = %5d' % (SIFT_num, Dense_num))
 
         if save:
-            cv2.imwrite(self.filename % 'SIFT', SIFT_img)
-            cv2.imwrite(self.filename % 'SIFTRich', RichSIFT_img)
+            cv2.imwrite(self.filename % 'sift', SIFT_img)
+            cv2.imwrite(self.filename % 'sift_rich', RichSIFT_img)
             #cv2.imwrite(self.filename % 'Dense', Dense_img)
             #cv2.imwrite(self.filename % 'DenseRich', RichDense_img)
 
@@ -123,7 +123,6 @@ class Visualizer(object):
         return img, rich_img, len(keypoints)
 
     def drawHoG(self, save=False, show=False):
-        # グレースケール化
         gray = cv2.cvtColor(self.color_image.copy(), cv2.COLOR_BGR2GRAY)
         _, hog_image = feature.hog(gray, orientations=9, pixels_per_cell=(16, 16), cells_per_block=(2, 2),
                                    block_norm="L2-Hys", visualize=True)
@@ -133,7 +132,6 @@ class Visualizer(object):
 
     def trancelbp(self, save=False, show=False):
         img = cv2.copyMakeBorder(self.color_image.copy(), 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
-        # グレースケール化
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         counter = 0
         lbp = 8 * [0]
