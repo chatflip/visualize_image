@@ -73,7 +73,6 @@ class Visualizer(object):
             cv2.imwrite(self.filename % 'gradient_color_y', img_y)
             cv2.imwrite(self.filename % 'gradient_color_xy', img_xy)
 
-
     def power_spectrum(self, save=False, show=False):
         gray = cv2.cvtColor(self.color_image.copy(), cv2.COLOR_BGR2GRAY)
         gray = np.array(gray)
@@ -88,22 +87,36 @@ class Visualizer(object):
         if save:
             cv2.imwrite(self.filename % 'power_spectrum', pow_img)
 
-    def drawKeypoint(self, save=False, show=False):
-        SIFT_img, RichSIFT_img, SIFT_num = self.draw_SIFT(self.color_image.copy())
+    def draw_keypoint(self, save=False, show=False):
+        sift_img, rich_sift_img, sift_keypoint_num = self.draw_sift(self.color_image.copy())
+        akaze_img, rich_akaze_img, akaze_keypoint_num = self.draw_akaze(self.color_image.copy())
         #Dense_img, RichDense_img, Dense_num = self.draw_Dense(self.color_image.copy())
-        #print('SIFT  = %5d\nDense = %5d' % (SIFT_num, Dense_num))
+        print('SIFT  = %5d\nAKAZE = %5d' % (sift_keypoint_num, akaze_keypoint_num))
 
         if save:
-            cv2.imwrite(self.filename % 'sift', SIFT_img)
-            cv2.imwrite(self.filename % 'sift_rich', RichSIFT_img)
+            cv2.imwrite(self.filename % 'sift', sift_img)
+            cv2.imwrite(self.filename % 'sift_rich', rich_sift_img)
+            cv2.imwrite(self.filename % 'akaze', akaze_img)
+            cv2.imwrite(self.filename % 'akaze_rich', rich_akaze_img)
             #cv2.imwrite(self.filename % 'Dense', Dense_img)
             #cv2.imwrite(self.filename % 'DenseRich', RichDense_img)
 
-    def draw_SIFT(self, original_img):
+    def draw_sift(self, original_img):
         gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
         img = original_img.copy()
         rich_img = original_img.copy()
         detector = cv2.SIFT_create()
+        keypoints = detector.detect(gray)
+        for key in keypoints:
+            cv2.circle(img, (np.uint64(key.pt[0]), np.uint64(key.pt[1])), 3, (255, 255, 0), 1)
+        cv2.drawKeypoints(rich_img, keypoints, rich_img, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        return img, rich_img, len(keypoints)
+
+    def draw_akaze(self, original_img):
+        gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+        img = original_img.copy()
+        rich_img = original_img.copy()
+        detector = cv2.AKAZE_create()
         keypoints = detector.detect(gray)
         for key in keypoints:
             cv2.circle(img, (np.uint64(key.pt[0]), np.uint64(key.pt[1])), 3, (255, 255, 0), 1)
@@ -122,7 +135,7 @@ class Visualizer(object):
         cv2.drawKeypoints(rich_img, keypoints, rich_img, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
         return img, rich_img, len(keypoints)
 
-    def drawHoG(self, save=False, show=False):
+    def draw_hog(self, save=False, show=False):
         gray = cv2.cvtColor(self.color_image.copy(), cv2.COLOR_BGR2GRAY)
         _, hog_image = feature.hog(gray, orientations=9, pixels_per_cell=(16, 16), cells_per_block=(2, 2),
                                    block_norm="L2-Hys", visualize=True)
@@ -130,7 +143,7 @@ class Visualizer(object):
         if save:
             cv2.imwrite(self.filename % 'hog', hog_image)
 
-    def trancelbp(self, save=False, show=False):
+    def draw_lbp(self, save=False, show=False):
         img = cv2.copyMakeBorder(self.color_image.copy(), 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         counter = 0
@@ -159,6 +172,6 @@ class Visualizer(object):
         self.gray_gradient(save=True)
         self.color_gradient(save=True)
         self.power_spectrum(save=True)
-        self.drawKeypoint(save=True)
-        self.drawHoG(save=True)
-        self.trancelbp(save=True)
+        self.draw_keypoint(save=True)
+        self.draw_hog(save=True)
+        self.draw_lbp(save=True)
