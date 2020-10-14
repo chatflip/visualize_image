@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from skimage import feature
 
+from dense_feature_detector import DenseFeatureDetector
 
 class Visualizer(object):
 
@@ -118,23 +119,26 @@ class Visualizer(object):
     def draw_keypoint(self, save=False, show=False):
         sift_img, rich_sift_img, sift_keypoint_num = self.draw_sift(self.color_image.copy())
         akaze_img, rich_akaze_img, akaze_keypoint_num = self.draw_akaze(self.color_image.copy())
-        # Dense_img, RichDense_img, Dense_num = self.draw_Dense(self.color_image.copy())
+        dense_img, rich_dense_img, dense_keypoint_num = self.draw_dense(self.color_image.copy())
         print('num of kps(SIFT) : {:5d}'.format(sift_keypoint_num))
         print('num of kps(AKAZE): {:5d}'.format(akaze_keypoint_num))
+        print('num of kps(DENSE): {:5d}'.format(dense_keypoint_num))
 
         if save:
             cv2.imwrite(self.filename % 'sift', sift_img)
             cv2.imwrite(self.filename % 'sift_rich', rich_sift_img)
             cv2.imwrite(self.filename % 'akaze', akaze_img)
             cv2.imwrite(self.filename % 'akaze_rich', rich_akaze_img)
-            # cv2.imwrite(self.filename % 'Dense', Dense_img)
-            # cv2.imwrite(self.filename % 'DenseRich', RichDense_img)
+            cv2.imwrite(self.filename % 'dense', dense_img)
+            cv2.imwrite(self.filename % 'dense_rich', rich_dense_img)
 
         if show:
             self.show_image(self.filename % 'sift', sift_img, is_last=False)
             self.show_image(self.filename % 'sift_rich', rich_sift_img, is_last=False)
             self.show_image(self.filename % 'akaze', akaze_img, is_last=False)
             self.show_image(self.filename % 'akaze_rich', rich_akaze_img)
+            self.show_image(self.filename % 'dense', dense_img, is_last=False)
+            self.show_image(self.filename % 'dense_rich', rich_dense_img)
 
     def draw_sift(self, original_img):
         gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
@@ -158,13 +162,12 @@ class Visualizer(object):
         cv2.drawKeypoints(rich_img, keypoints, rich_img, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
         return img, rich_img, len(keypoints)
 
-    def draw_Dense(self, original_img):
+    def draw_dense(self, original_img):
         gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
         img = original_img.copy()
         rich_img = original_img.copy()
-        detector = cv2.xfeatures2d.SIFT_create()
-        # detector = cv2.FeatureDetector_create("Dense")
-        keypoints = detector.detect(gray)
+        detector = DenseFeatureDetector(cv2.SIFT_create(), step=5, scale=5, start=0)
+        keypoints, _ = detector.detect(gray)
         for key in keypoints:
             cv2.circle(img, (np.uint64(key.pt[0]), np.uint64(key.pt[1])), 3, (255, 255, 0), 1)
         cv2.drawKeypoints(rich_img, keypoints, rich_img, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
@@ -177,6 +180,9 @@ class Visualizer(object):
         hog_image = np.uint8(hog_image * 255)
         if save:
             cv2.imwrite(self.filename % 'hog', hog_image)
+
+        if show:
+            self.show_image(self.filename % 'hog', hog_image)
 
     def draw_lbp(self, save=False, show=False):
         img = cv2.copyMakeBorder(self.color_image.copy(), 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
