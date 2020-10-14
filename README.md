@@ -5,5 +5,5 @@ Python 3.x
 
 ## Install
 ```bash
-pip install opencv-python opencv-contrib-python scikit-image
+pip install opencv-python scikit-image
 ```

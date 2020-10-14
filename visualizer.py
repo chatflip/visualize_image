@@ -89,35 +89,21 @@ class Visualizer(object):
             cv2.imwrite(self.filename % 'power_spectrum', pow_img)
 
     def drawKeypoint(self, save=False, show=False):
-        #SURF_img, RichSURF_img, SURF_num = self.draw_SURF(self.color_image.copy())
         SIFT_img, RichSIFT_img, SIFT_num = self.draw_SIFT(self.color_image.copy())
-        Dense_img, RichDense_img, Dense_num = self.draw_Dense(self.color_image.copy())
-        #print('SURF  = %5d\nSIFT  = %5d\nDense = %5d' % (SURF_num, SIFT_num, Dense_num))
+        #Dense_img, RichDense_img, Dense_num = self.draw_Dense(self.color_image.copy())
+        #print('SIFT  = %5d\nDense = %5d' % (SIFT_num, Dense_num))
 
         if save:
-            #cv2.imwrite(self.filename % 'SURF', SURF_img)
-            #cv2.imwrite(self.filename % 'SURFRich', RichSURF_img)
             cv2.imwrite(self.filename % 'SIFT', SIFT_img)
             cv2.imwrite(self.filename % 'SIFTRich', RichSIFT_img)
             #cv2.imwrite(self.filename % 'Dense', Dense_img)
             #cv2.imwrite(self.filename % 'DenseRich', RichDense_img)
 
-    def draw_SURF(self, original_img):
-        gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
-        img = original_img.copy()
-        rich_img = original_img.copy()
-        detector = cv2.xfeatures2d.SURF_create()
-        keypoints = detector.detect(gray)
-        for key in keypoints:
-            cv2.circle(img, (np.uint64(key.pt[0]), np.uint64(key.pt[1])), 3, (255, 255, 0), 1)
-        cv2.drawKeypoints(rich_img, rich_img, keypoints, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-        return img, rich_img, len(keypoints)
-
     def draw_SIFT(self, original_img):
         gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
         img = original_img.copy()
         rich_img = original_img.copy()
-        detector = cv2.xfeatures2d.SIFT_create()
+        detector = cv2.SIFT_create()
         keypoints = detector.detect(gray)
         for key in keypoints:
             cv2.circle(img, (np.uint64(key.pt[0]), np.uint64(key.pt[1])), 3, (255, 255, 0), 1)
