@@ -17,10 +17,23 @@ class Visualizer(object):
         name, ext = os.path.splitext(src_path)
         self.filename = '{}/{}_%s{}'.format(dst_path, name, ext)
 
+    @staticmethod
+    def show_image(image, filename, is_last=True):
+        if is_last:
+            cv2.imshow(image, filename)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+        else:
+            cv2.imshow(image, filename)
+
     def gray(self, save=False, show=False):
         gray = cv2.cvtColor(self.color_image.copy(), cv2.COLOR_BGR2GRAY)
+
         if save:
             cv2.imwrite(self.filename % 'gray', gray)
+
+        if show:
+            self.show_image(self.filename % 'gray',  gray)
 
     def color_channel(self, save=False, show=False):
         color_image = self.color_image.copy()
@@ -36,6 +49,11 @@ class Visualizer(object):
             cv2.imwrite(self.filename % 'green', green)
             cv2.imwrite(self.filename % 'red', red)
 
+        if show:
+            self.show_image(self.filename % 'blue', blue, is_last=False)
+            self.show_image(self.filename % 'green', green, is_last=False)
+            self.show_image(self.filename % 'red', red)
+
     def gray_gradient(self, save=False, show=False):
         gray = cv2.cvtColor(self.color_image.copy(), cv2.COLOR_BGR2GRAY)
         kernel_x = np.array([[0, 0, 0], [-1, 0, 1], [0, 0, 0]], np.float32)
@@ -49,6 +67,11 @@ class Visualizer(object):
             cv2.imwrite(self.filename % 'gradient_x', img_x)
             cv2.imwrite(self.filename % 'gradient_y', img_y)
             cv2.imwrite(self.filename % 'gradient_xy', img_xy)
+
+        if show:
+            self.show_image(self.filename % 'gradient_x', img_x, is_last=False)
+            self.show_image(self.filename % 'gradient_y', img_y, is_last=False)
+            self.show_image(self.filename % 'gradient_xy', img_xy)
 
     def color_gradient(self, save=False, show=False):
         color_image = self.color_image.copy()
@@ -73,6 +96,11 @@ class Visualizer(object):
             cv2.imwrite(self.filename % 'gradient_color_y', img_y)
             cv2.imwrite(self.filename % 'gradient_color_xy', img_xy)
 
+        if show:
+            self.show_image(self.filename % 'gradient_color_x', img_x, is_last=False)
+            self.show_image(self.filename % 'gradient_color_y', img_y, is_last=False)
+            self.show_image(self.filename % 'gradient_color_xy', img_xy)
+
     def power_spectrum(self, save=False, show=False):
         gray = cv2.cvtColor(self.color_image.copy(), cv2.COLOR_BGR2GRAY)
         gray = np.array(gray)
@@ -90,16 +118,23 @@ class Visualizer(object):
     def draw_keypoint(self, save=False, show=False):
         sift_img, rich_sift_img, sift_keypoint_num = self.draw_sift(self.color_image.copy())
         akaze_img, rich_akaze_img, akaze_keypoint_num = self.draw_akaze(self.color_image.copy())
-        #Dense_img, RichDense_img, Dense_num = self.draw_Dense(self.color_image.copy())
-        print('SIFT  = %5d\nAKAZE = %5d' % (sift_keypoint_num, akaze_keypoint_num))
+        # Dense_img, RichDense_img, Dense_num = self.draw_Dense(self.color_image.copy())
+        print('num of kps(SIFT) : {:5d}'.format(sift_keypoint_num))
+        print('num of kps(AKAZE): {:5d}'.format(akaze_keypoint_num))
 
         if save:
             cv2.imwrite(self.filename % 'sift', sift_img)
             cv2.imwrite(self.filename % 'sift_rich', rich_sift_img)
             cv2.imwrite(self.filename % 'akaze', akaze_img)
             cv2.imwrite(self.filename % 'akaze_rich', rich_akaze_img)
-            #cv2.imwrite(self.filename % 'Dense', Dense_img)
-            #cv2.imwrite(self.filename % 'DenseRich', RichDense_img)
+            # cv2.imwrite(self.filename % 'Dense', Dense_img)
+            # cv2.imwrite(self.filename % 'DenseRich', RichDense_img)
+
+        if show:
+            self.show_image(self.filename % 'sift', sift_img, is_last=False)
+            self.show_image(self.filename % 'sift_rich', rich_sift_img, is_last=False)
+            self.show_image(self.filename % 'akaze', akaze_img, is_last=False)
+            self.show_image(self.filename % 'akaze_rich', rich_akaze_img)
 
     def draw_sift(self, original_img):
         gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
@@ -128,7 +163,7 @@ class Visualizer(object):
         img = original_img.copy()
         rich_img = original_img.copy()
         detector = cv2.xfeatures2d.SIFT_create()
-        #detector = cv2.FeatureDetector_create("Dense")
+        # detector = cv2.FeatureDetector_create("Dense")
         keypoints = detector.detect(gray)
         for key in keypoints:
             cv2.circle(img, (np.uint64(key.pt[0]), np.uint64(key.pt[1])), 3, (255, 255, 0), 1)
@@ -163,8 +198,12 @@ class Visualizer(object):
                     6] * 2 ** 2 + lbp[5] * 2 ** 1 + lbp[3] * 2 ** 0
                 lbp_picture[centerY - 1, centerX - 1] = lbp_pix
                 counter = 0
+
         if save:
             cv2.imwrite(self.filename % 'lbp', lbp_picture)
+
+        if show:
+            self.show_image(self.filename % 'lbp', lbp_picture)
 
     def save_all(self):
         self.gray(save=True)
@@ -175,3 +214,13 @@ class Visualizer(object):
         self.draw_keypoint(save=True)
         self.draw_hog(save=True)
         self.draw_lbp(save=True)
+
+    def show_all(self):
+        self.gray(show=True)
+        self.color_channel(show=True)
+        self.gray_gradient(show=True)
+        self.color_gradient(show=True)
+        self.power_spectrum(show=True)
+        self.draw_keypoint(show=True)
+        self.draw_hog(show=True)
+        self.draw_lbp(show=True)

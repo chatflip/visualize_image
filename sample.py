@@ -7,4 +7,5 @@ if __name__ == '__main__':
     dst_path = 'output'
     os.makedirs(dst_path, exist_ok=True)
     vis = Visualizer(src_path, dst_path)
+    #vis.show_all()
     vis.save_all()
