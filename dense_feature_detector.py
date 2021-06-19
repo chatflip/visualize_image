@@ -2,6 +2,7 @@
 
 import cv2
 
+
 class DenseFeatureDetector(object):
     def __init__(self, detector, step, scale, start):
         self._detector = detector
